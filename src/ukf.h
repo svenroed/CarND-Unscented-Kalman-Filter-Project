@@ -8,13 +8,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 class UKF {
-public:
-
-  ///* initially set to false, set to true in first call of ProcessMeasurement
-  bool is_initialized_;
-
-  // previous timestamp
-  long previous_timestamp_;
+ public:
 
   ///* if this is false, laser measurements will be ignored (except for init)
   bool use_laser_;
@@ -53,7 +47,7 @@ public:
   double std_radphi_;
 
   ///* Radar measurement noise standard deviation radius change in m/s
-  double std_radrd_ ;
+  double std_radrd_;
 
   ///* Weights of sigma points
   VectorXd weights_;
@@ -72,6 +66,9 @@ public:
 
   ///* the current NIS for laser
   double NIS_laser_;
+
+  ///* initially set to false, set to true in first call of ProcessMeasurement
+  bool is_initialized_;
 
   /**
    * Constructor
@@ -108,12 +105,38 @@ public:
    */
   void UpdateRadar(MeasurementPackage meas_package);
 
-  MatrixXd GenerateSigmaPoints();
+  /*!
+   * Generate agumented sigma points
+   * @return MatrixXd
+   */
   MatrixXd AugmentedSigmaPoints();
+
+  /*!
+   * Update the state, user for lidar and radar, tinkers with x_ and P_
+   * @param n_z
+   * @param Zsig
+   * @param z_pred
+   * @param S
+   * @param measurement
+   */
   void UpdateState(int n_z, MatrixXd Zsig, VectorXd z_pred, MatrixXd S, VectorXd measurement);
+
+  /*!
+   * Predict sigma point with augmented sigma points
+   * @param Xsig_aug
+   * @param delta_t
+   */
   void SigmaPointPrediction(MatrixXd Xsig_aug, double delta_t);
-  void PredictMeanAndCovariance();
-  double CalculateNIS(int n_z, VectorXd z_pred, VectorXd measurement, MatrixXd S);
+
+  /*!
+   * PredictMeanAndCovariance (updates x_ and P_ as well)
+   */
+   void PredictMeanAndCovariance();
+
+  /*!
+ * UpdateWeigths (weights_)
+ */
+  void UpdateWeigths();
 };
 
 #endif /* UKF_H */
